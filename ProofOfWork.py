@@ -59,9 +59,25 @@ def testAttempt (challenge, hashSize) :
         for i in range (0,challenge) :
             numZeros += '0'
 
-        # Finally, we use the hexdigest method. This 
+        # Finally, we use the hexdigest method.
+        #  The digest is our end product, the candidate for the nonce. It is the
+        #  string of digits that is created by our one-way hashing formula.
+        # Nonce is short for "number only used once," and this is what is needed
+        #  to create a new block in the chain. Every block is only proven to be valid
+        #  by the nonce data member within it, which shows that the correct amount of
+        #  work has been done to create that block, and thus the entire chain up
+        #  to that point.
+        # An invalid chain is detected when its total proof of work can be seen to be
+        #  less than what is inside the true blockchain. This is why people are able to
+        #  trust Bitcoin transactions: invalid transactions will end up being invalidated,
+        #  since they will not have as much proof of work as the true blockchain does.
         nonce = shaHash.hexdigest()
 
+        # If the nonce starts with enough 0's, which requires a huge number of random
+        #  guesses to find, it is a candidate for a new block to be added. The "miner"
+        #  who found this nonce can then add to the block their signature, showing that
+        #  they were the one who did the work, and they will be rewarded automatically
+        #  with a certain amount of blockchain currency.
         if nonce.startswith(numZeros):
             print('The nonce looks like...\n',nonce,'\n')
             print('Finding nonce took: ', (time.time() - start), ' seconds.\n')
