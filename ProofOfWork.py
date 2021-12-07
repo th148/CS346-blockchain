@@ -88,6 +88,8 @@ def testAttempt (challenge, hashSize) :
     print('The string fed to the hash looks like...\n',attempt,'\n')
     print('Took ',attemptCounter,' attempts.')
 
+    return shaHash
+
 
 def main():
 
