@@ -57,9 +57,6 @@ class Tx:
             str(self.receiver),
         ]) + "]"
 
-    def __rpr__(self):
-        return str(self)
-
 class Block:
 
     # In blockchain, the transactions will be stored in the next block.
@@ -101,9 +98,6 @@ class Block:
 
     def __str__(self):
         return f"block[nonce: {self.nonce}, prev: {self.prev_block.nonce}]"
-
-    def __rpr__(self):
-        return str(self)
 
 
 class GenesisBlock(Block):
