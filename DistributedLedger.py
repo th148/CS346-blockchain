@@ -82,13 +82,16 @@ class Block:
         # representation of the new transaction
         self.attempt_str, self.nonce = testAttempt(self.challenge_level,
                                                    self.hash_size,
-                                                   str(self.transaction))
+                                                   self.getBlockData())
 
     def validate(self):
         return (
             bool(self.nonce) and
-            validateNonce(self.nonce, self.attempt_str, str(self.transaction))
+            validateNonce(self.nonce, self.attempt_str, self.getBlockData())
         )
+
+    def getBlockData (self):
+        return str(self.prev_block.nonce) + str(self.transaction)
 
     def __get_hashSize (self):
         return 30
@@ -97,7 +100,7 @@ class Block:
         return 4
 
     def __str__(self):
-        return f"block[nonce: {self.nonce}, prev: {self.prev_block.nonce}]"
+        return f"Block[nonce: {self.nonce}, prev: {self.prev_block.nonce}]"
 
 
 class GenesisBlock(Block):
@@ -136,7 +139,7 @@ class BlockChain:
         return self.getBlock(-1)
 
     def __str__(self):
-        return "block_chain:\n" + '\n'.join(str(b) for b in self.blocks)
+        return "BlockChain:\n" + '\n'.join(f"\t{str(b)}" for b in self.blocks)
 
 
 def main ():
@@ -144,26 +147,30 @@ def main ():
     print("TEST: genesis_block")
     my_genblock = GenesisBlock()
     print("genesis_block nonce: my_genblock.nonce")
-    print("SUCCESS")
+    print("END TEST")
     print("------------------------------------------------")
     print()
 
     print("------------------------------------------------")
-    print("TEST: block")
+    print("TEST: Block")
     my_block = Block(my_genblock, Tx(5, "Sean", "Toby"))
     block_valid = my_block.validate()
-    print("block.validate(): ", block_valid)
+    print("Block.validate(): ", block_valid)
     if block_valid:
         print("SUCCESS: Block created and validated.")
+    else:
+        print("FAIL: Block failed to validate.")
+    print("END TEST")
     print("------------------------------------------------")
     print()
 
     print("------------------------------------------------")
-    print("Testing class: block_chain")
+    print("TEST: BlockChain")
     my_blockchain = BlockChain()
     my_blockchain.addTx(Tx(5, "Sean", "Toby"))
     my_blockchain.addTx(Tx(5, "Toby", "Sean"))
     print(my_blockchain)
+    print("END TEST")
     print("------------------------------------------------")
     print()
 
