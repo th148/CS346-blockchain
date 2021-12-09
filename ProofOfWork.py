@@ -22,12 +22,17 @@ def generation (size) :
     return attempt
 
 
-def testAttempt (challenge, hashSize) :
+def testAttempt (challenge, hashSize, blockData) :
     nonceFound = False
 
     start = time.time()
 
     attemptCounter = 0
+
+    # Declaring attempt and nonce in advance since we will return them.
+    attempt = ""
+    nonce = ""
+
     while not nonceFound:
         attemptCounter += 1
 
@@ -47,7 +52,7 @@ def testAttempt (challenge, hashSize) :
         #  UTF stand for Unicode Transformation Format.
         #  Here we use UTF-8, since it has the property that strings of ASCII text
         #  are also valid UTF-8 text, and it is a byte-oriented encoding method.
-        b = bytes(attempt, 'utf-8')
+        b = bytes(attempt + blockData, 'utf-8')
 
         # This 'update' method is what changes our hash object, trying with a new
         #  random set of characters turned into bytes and being 'fed' to the front of it.
@@ -86,9 +91,15 @@ def testAttempt (challenge, hashSize) :
 
     print('The final hash looks like...\n',shaHash,'\n')
     print('The string fed to the hash looks like...\n',attempt,'\n')
-    print('Took ',attemptCounter,' attempts.')
+    print(blockData)
+    print('Took ', attemptCounter, ' attempts.')
 
-    return shaHash
+    return attempt, nonce
+
+
+def validateNonce(nonce, attempt_str, block_data):
+    b = bytes(attempt_str + block_data, 'utf-8')
+    return nonce == hashlib.sha256(b).hexdigest()
 
 
 def main():
