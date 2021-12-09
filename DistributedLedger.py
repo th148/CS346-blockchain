@@ -16,7 +16,7 @@ from ProofOfWork import *
 #
 
 #
-#  In the context of a blockchain currency, "transaction" is typically abbreviated to TX.
+#  In the context of a blockchain currency, "transaction" is typically abbreviated to Tx.
 #
 #  Transactions accrue on the network, waiting for a new block to go through so that they can
 #   be validated (they are attached to the block.) This is the distributed ledger. Everyone, even
@@ -37,7 +37,7 @@ from ProofOfWork import *
 #  the validity of the currency.
 #
 
-class TX:
+class Tx:
 
     # In the case of the sender and receiver, in a real blockchain network, we would
     #  use unique digital signatures instead of names. However in this example we will
@@ -50,7 +50,7 @@ class TX:
         self.receiver = receiver
 
     def __str__(self):
-        return "TX[" + ":".join([
+        return "Tx[" + ":".join([
             str(self.tx_amount),
             str(self.timestamp),
             str(self.sender),
@@ -60,7 +60,7 @@ class TX:
     def __rpr__(self):
         return str(self)
 
-class block:
+class Block:
 
     # In blockchain, the transactions will be stored in the next block.
     #  Invalid transactions are prevented by the protocol itself;
@@ -76,15 +76,15 @@ class block:
         self.prev_block = prev_block
         self.transaction = transaction
 
-        self.hashSize = self.__get_hashSize()
-        self.challengeLevel = self.__get_challengeLevel()
+        self.hash_size = self.__get_hashSize()
+        self.challenge_level = self.__get_challengeLevel()
 
         self.nonce = ""
 
         # block_data consists of the previous block's nonce and a string
         # representation of the new transaction
-        self.attempt_str, self.nonce = testAttempt(self.challengeLevel,
-                                                   self.hashSize,
+        self.attempt_str, self.nonce = testAttempt(self.challenge_level,
+                                                   self.hash_size,
                                                    str(self.transaction))
 
     def validate(self):
@@ -106,7 +106,7 @@ class block:
         return str(self)
 
 
-class genesis_block(block):
+class GenesisBlock(Block):
 
     def __init__(self):
         self.nonce = secrets.token_hex()
@@ -118,21 +118,22 @@ class genesis_block(block):
         return f"genesis_block[nonce: {self.nonce}]"
 
 
-class block_chain:
+class BlockChain:
 
     def __init__(self):
         self.blocks = []
-        self.blocks.append(genesis_block())
+        self.blocks.append(GenesisBlock())
 
     def addTx(self, new_tx):
-        self.addBlock(block(self.lastBlock(), new_tx))
+        self.addBlock(Block(self.lastBlock(), new_tx))
 
     def addBlock(self, new_block):
         # Verify the new block to be added.
         if new_block.prev_block == self.lastBlock() and new_block.validate():
             self.blocks.append(new_block)
+            print("SUCCESS: Validated and added new block!")
         else:
-            print("Failed to validate new block")
+            print("FAIL: Failed to validate new block!")
 
     def getBlock(self, index=-1):
         return self.blocks[-1]
@@ -147,7 +148,7 @@ class block_chain:
 def main ():
     print("------------------------------------------------")
     print("TEST: genesis_block")
-    my_genblock = genesis_block()
+    my_genblock = GenesisBlock()
     print("genesis_block nonce: my_genblock.nonce")
     print("SUCCESS")
     print("------------------------------------------------")
@@ -155,7 +156,7 @@ def main ():
 
     print("------------------------------------------------")
     print("TEST: block")
-    my_block = block(my_genblock, TX(5, "Sean", "Toby"))
+    my_block = Block(my_genblock, Tx(5, "Sean", "Toby"))
     block_valid = my_block.validate()
     print("block.validate(): ", block_valid)
     if block_valid:
@@ -165,9 +166,9 @@ def main ():
 
     print("------------------------------------------------")
     print("Testing class: block_chain")
-    my_blockchain = block_chain()
-    my_blockchain.addTx(TX(5, "Sean", "Toby"))
-    my_blockchain.addTx(TX(5, "Toby", "Sean"))
+    my_blockchain = BlockChain()
+    my_blockchain.addTx(Tx(5, "Sean", "Toby"))
+    my_blockchain.addTx(Tx(5, "Toby", "Sean"))
     print(my_blockchain)
     print("------------------------------------------------")
     print()
