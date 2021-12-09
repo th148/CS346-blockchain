@@ -23,6 +23,9 @@ def genString (size) :
 
 
 def testAttempt (challenge, hash_size, block_data) :
+
+    print('\n', "Beginning proof-of-work...")
+
     nonce_found = False
 
     start = time.time()
@@ -95,7 +98,10 @@ def testAttempt (challenge, hash_size, block_data) :
 
     # print('The final hash looks like...\n',sha_hash,'\n')
     print('The string fed to the hash looks like...\n', attempt, '\n')
-    print('Took ', attempt_counter, ' attempts.')
+    print('Took ', attempt_counter, ' attempts.\n')
+
+    print('Proof-of-work successful!!!\n\n')
+
 
     return attempt, nonce
 
