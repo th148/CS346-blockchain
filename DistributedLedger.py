@@ -1,6 +1,7 @@
 import hashlib
+import secrets
 import time
-from .ProofOfWork import *
+from ProofOfWork import *
 
 #
 #  This Python code demonstrates the "Distributed Ledger" aspect of
@@ -43,10 +44,21 @@ class TX:
     #  use simple names, Bob and Sue.
 
     def __init__(self, tx_amount, sender, receiver):
-        self.tx_message = tx_amount
+        self.tx_amount = tx_amount
         self.timestamp = time.time()
         self.sender = sender
         self.receiver = receiver
+
+    def __str__(self):
+        return "TX[" + ":".join([
+            str(self.tx_amount),
+            str(self.timestamp),
+            str(self.sender),
+            str(self.receiver),
+        ]) + "]"
+
+    def __rpr__(self):
+        return str(self)
 
 class block:
 
@@ -64,29 +76,102 @@ class block:
         self.prev_block = prev_block
         self.transaction = transaction
 
-        self.hashSize = self.__get_hashSize
-        self.challengeLevel = self.__get_challengeLevel
+        self.hashSize = self.__get_hashSize()
+        self.challengeLevel = self.__get_challengeLevel()
 
-        self.nonce = testAttempt()
+        self.nonce = ""
+
+        # block_data consists of the previous block's nonce and a string
+        # representation of the new transaction
+        self.attempt_str, self.nonce = testAttempt(self.challengeLevel,
+                                                   self.hashSize,
+                                                   str(self.transaction))
+
+    def validate(self):
+        return (
+            bool(self.nonce) and
+            validateNonce(self.nonce, self.attempt_str, str(self.transaction))
+        )
 
     def __get_hashSize (self):
         return 30
 
     def __get_challengeLevel (self):
         return 4
-    
+
+    def __str__(self):
+        return f"block[nonce: {self.nonce}, prev: {self.prev_block.nonce}]"
+
+    def __rpr__(self):
+        return str(self)
+
+
+class genesis_block(block):
+
+    def __init__(self):
+        self.nonce = secrets.token_hex()
+
+    def validate(self):
+        return True
+
+    def __str__(self):
+        return f"genesis_block[nonce: {self.nonce}]"
+
 
 class block_chain:
 
     def __init__(self):
-        pass
+        self.blocks = []
+        self.blocks.append(genesis_block())
 
-    def addBlock (self):
+    def addTx(self, new_tx):
+        self.addBlock(block(self.lastBlock(), new_tx))
 
+    def addBlock(self, new_block):
+        # Verify the new block to be added.
+        if new_block.prev_block == self.lastBlock() and new_block.validate():
+            self.blocks.append(new_block)
+        else:
+            print("Failed to validate new block")
+
+    def getBlock(self, index=-1):
+        return self.blocks[-1]
+
+    def lastBlock(self):
+        return self.getBlock(-1)
+
+    def __str__(self):
+        return "block_chain:\n" + '\n'.join(str(b) for b in self.blocks)
 
 
 def main ():
-    pass
+    print("------------------------------------------------")
+    print("TEST: genesis_block")
+    my_genblock = genesis_block()
+    print("genesis_block nonce: my_genblock.nonce")
+    print("SUCCESS")
+    print("------------------------------------------------")
+    print()
+
+    print("------------------------------------------------")
+    print("TEST: block")
+    my_block = block(my_genblock, TX(5, "Sean", "Toby"))
+    block_valid = my_block.validate()
+    print("block.validate(): ", block_valid)
+    if block_valid:
+        print("SUCCESS: Block created and validated.")
+    print("------------------------------------------------")
+    print()
+
+    print("------------------------------------------------")
+    print("Testing class: block_chain")
+    my_blockchain = block_chain()
+    my_blockchain.addTx(TX(5, "Sean", "Toby"))
+    my_blockchain.addTx(TX(5, "Toby", "Sean"))
+    print(my_blockchain)
+    print("------------------------------------------------")
+    print()
+
 
 if __name__ == "__main__" :
     main()
